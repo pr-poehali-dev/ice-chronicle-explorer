@@ -133,15 +133,22 @@ const ArcticMap = ({ character, onOpenAI }: ArcticMapProps) => {
   }
 
   return (
-    <div className="min-h-screen p-6 animate-fade-in">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-gradient-to-tl from-nasa-cyan/10 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+      </div>
+
       {/* Header */}
-      <div className="max-w-7xl mx-auto mb-6">
-        <div className="bg-white/90 backdrop-blur rounded-lg border border-primary/20 p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="text-4xl">{character.avatar}</div>
+      <div className="max-w-7xl mx-auto mb-6 relative z-10 animate-slide-up">
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl border-2 border-primary/20 p-5 flex items-center justify-between shadow-xl hover:shadow-2xl transition-all duration-300 card-hover">
+          <div className="flex items-center gap-5">
+            <div className="text-5xl p-3 bg-gradient-to-br from-primary/10 to-nasa-cyan/10 rounded-xl animate-bounce-subtle">{character.avatar}</div>
             <div>
-              <h2 className="text-xl font-bold">{character.name}</h2>
-              <p className="text-sm text-muted-foreground font-mono">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-nasa-cyan bg-clip-text text-transparent">{character.name}</h2>
+              <p className="text-base text-muted-foreground font-mono flex items-center gap-2">
+                <Icon name="Star" size={16} className="text-nasa-cyan" />
                 {character.role === 'climatologist' && 'Климатолог'}
                 {character.role === 'biologist' && 'Биолог'}
                 {character.role === 'engineer' && 'Инженер'}
@@ -149,35 +156,42 @@ const ArcticMap = ({ character, onOpenAI }: ArcticMapProps) => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="font-mono">
-              <Icon name="Award" size={16} className="mr-1" />
+          <div className="flex items-center gap-3">
+            <Badge variant="outline" className="font-mono text-base px-4 py-2 border-2 border-primary/30 shine-effect">
+              <Icon name="Award" size={18} className="mr-2 text-nasa-cyan" />
               {completedMissions.length} / {missions.length} миссий
             </Badge>
-            <Button onClick={onOpenAI} variant="outline">
-              <Icon name="Bot" size={20} className="mr-2" />
+            <Button onClick={onOpenAI} className="bg-gradient-to-r from-primary to-nasa-cyan hover:from-primary/90 hover:to-nasa-cyan/90 transition-all hover:scale-105 shine-effect">
+              <Icon name="Bot" size={22} className="mr-2" />
               ИИ-Помощник Арктина
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-6">
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-6 relative z-10">
         {/* Map and controls */}
         <div className="lg:col-span-2 space-y-6">
           {/* Timeline */}
-          <Card className="p-6 bg-white/90 backdrop-blur">
-            <h3 className="font-bold mb-4 flex items-center gap-2">
-              <Icon name="Calendar" size={20} />
-              Временная шкала
+          <Card className="p-7 bg-white/95 backdrop-blur-xl border-2 border-primary/20 shadow-xl hover:shadow-2xl transition-all duration-300 animate-fade-in card-hover">
+            <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-primary/10 to-nasa-cyan/10 rounded-lg">
+                <Icon name="Calendar" size={24} className="text-primary" />
+              </div>
+              <span className="bg-gradient-to-r from-primary to-nasa-cyan bg-clip-text text-transparent">Временная шкала</span>
             </h3>
-            <div className="flex gap-2">
-              {timelineYears.map(year => (
+            <div className="flex gap-3">
+              {timelineYears.map((year, index) => (
                 <Button
                   key={year}
                   variant={selectedYear === year ? 'default' : 'outline'}
                   onClick={() => setSelectedYear(year)}
-                  className="flex-1 font-mono"
+                  className={`flex-1 font-mono text-base py-6 transition-all duration-300 hover:scale-105 shine-effect animate-fade-in-scale ${
+                    selectedYear === year 
+                      ? 'bg-gradient-to-r from-primary to-nasa-cyan shadow-lg' 
+                      : 'border-2 hover:border-primary/50'
+                  }`}
+                  style={{ animationDelay: `${index * 0.05}s` }}
                 >
                   {year}
                 </Button>
@@ -186,73 +200,56 @@ const ArcticMap = ({ character, onOpenAI }: ArcticMapProps) => {
           </Card>
 
           {/* Map visualization with dynamic chart */}
-          <Card className="p-6 bg-white/90 backdrop-blur">
-            <h3 className="font-bold mb-4 flex items-center gap-2">
-              <Icon name="BarChart3" size={20} />
-              Данные за {selectedYear} год
-            </h3>
-            <div className="bg-gradient-to-b from-accent to-white p-6 rounded-lg border border-primary/20">
-              <div className="grid grid-cols-4 gap-4 mb-6">
-                <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                  <Icon name="Snowflake" size={24} className="text-blue-500 mx-auto mb-1" />
-                  <div className="text-2xl font-bold font-mono text-blue-500">{currentData.ice}</div>
-                  <div className="text-xs text-muted-foreground">млн км² льда</div>
-                </div>
-                <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                  <Icon name="Thermometer" size={24} className="text-orange-500 mx-auto mb-1" />
-                  <div className="text-2xl font-bold font-mono text-orange-500">{currentData.temp > 0 ? '+' : ''}{currentData.temp}°C</div>
-                  <div className="text-xs text-muted-foreground">температура</div>
-                </div>
-                <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                  <Icon name="PawPrint" size={24} className="text-green-500 mx-auto mb-1" />
-                  <div className="text-2xl font-bold font-mono text-green-500">{(currentData.bears / 1000).toFixed(1)}k</div>
-                  <div className="text-xs text-muted-foreground">медведей</div>
-                </div>
-                <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                  <Icon name="CloudRain" size={24} className="text-purple-500 mx-auto mb-1" />
-                  <div className="text-2xl font-bold font-mono text-purple-500">{currentData.co2}</div>
-                  <div className="text-xs text-muted-foreground">ppm CO₂</div>
-                </div>
+          <Card className="p-7 bg-white/95 backdrop-blur-xl border-2 border-primary/20 shadow-xl hover:shadow-2xl transition-all duration-300 animate-fade-in card-hover" style={{ animationDelay: '0.1s' }}>
+            <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-primary/10 to-nasa-cyan/10 rounded-lg">
+                <Icon name="BarChart3" size={24} className="text-primary" />
               </div>
-              <div className="flex items-end justify-around h-48 gap-3">
-                {activeLayers.includes('ice') && (
-                  <div className="flex-1 flex flex-col items-center gap-2">
-                    <div className="text-xs font-mono font-bold text-blue-500">{currentData.ice}</div>
-                    <div 
-                      className="w-full rounded-t bg-blue-500 transition-all duration-500"
-                      style={{ height: `${(currentData.ice / 16.5) * 100}%` }}
-                    />
-                    <div className="text-xs font-mono text-muted-foreground">Лёд</div>
+              <span className="bg-gradient-to-r from-primary to-nasa-cyan bg-clip-text text-transparent">Данные за {selectedYear} год</span>
+            </h3>
+            <div className="bg-gradient-to-br from-accent/50 via-white to-accent/30 p-7 rounded-2xl border-2 border-primary/10">
+              <div className="grid grid-cols-4 gap-4 mb-8">
+                {[
+                  { icon: 'Snowflake', value: currentData.ice, label: 'млн км² льда', color: 'blue', gradient: 'from-blue-400 to-blue-600' },
+                  { icon: 'Thermometer', value: `${currentData.temp > 0 ? '+' : ''}${currentData.temp}°C`, label: 'температура', color: 'orange', gradient: 'from-orange-400 to-red-500' },
+                  { icon: 'PawPrint', value: `${(currentData.bears / 1000).toFixed(1)}k`, label: 'медведей', color: 'green', gradient: 'from-green-400 to-emerald-600' },
+                  { icon: 'CloudRain', value: currentData.co2, label: 'ppm CO₂', color: 'purple', gradient: 'from-purple-400 to-pink-500' }
+                ].map((item, i) => (
+                  <div key={i} className="group text-center p-4 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-110 card-hover animate-fade-in-scale" style={{ animationDelay: `${0.2 + i * 0.05}s` }}>
+                    <div className={`p-3 rounded-xl bg-gradient-to-br ${item.gradient} mb-3 inline-block group-hover:animate-bounce-subtle`}>
+                      <Icon name={item.icon as any} size={28} className="text-white" />
+                    </div>
+                    <div className={`text-3xl font-bold font-mono text-${item.color}-500 mb-1`}>{item.value}</div>
+                    <div className="text-xs text-muted-foreground font-medium">{item.label}</div>
                   </div>
-                )}
-                {activeLayers.includes('temperature') && (
-                  <div className="flex-1 flex flex-col items-center gap-2">
-                    <div className="text-xs font-mono font-bold text-orange-500">{currentData.temp}°C</div>
-                    <div 
-                      className="w-full rounded-t bg-orange-500 transition-all duration-500"
-                      style={{ height: `${Math.abs(currentData.temp / 3.5) * 100}%` }}
-                    />
-                    <div className="text-xs font-mono text-muted-foreground">Темп.</div>
+                ))}
+              </div>
+              <div className="flex items-end justify-around h-56 gap-4 bg-white/50 rounded-xl p-4">
+                {[
+                  { id: 'ice', value: currentData.ice, max: 16.5, label: 'Лёд', gradient: 'from-blue-400 to-blue-600' },
+                  { id: 'temperature', value: Math.abs(currentData.temp), max: 3.5, label: 'Темп.', gradient: 'from-orange-400 to-red-500', display: `${currentData.temp}°C` },
+                  { id: 'animals', value: currentData.bears, max: 35000, label: 'Медведи', gradient: 'from-green-400 to-emerald-600', display: `${(currentData.bears / 1000).toFixed(0)}k` },
+                  { id: 'co2', value: currentData.co2 - 300, max: 220, label: 'CO₂', gradient: 'from-purple-400 to-pink-500', display: currentData.co2 }
+                ].filter(item => activeLayers.includes(item.id)).map((item, i) => (
+                  <div key={item.id} className="flex-1 flex flex-col items-center gap-3 group animate-slide-up" style={{ animationDelay: `${0.3 + i * 0.1}s` }}>
+                    <div className="text-sm font-mono font-bold text-primary bg-white px-3 py-1 rounded-full shadow-md group-hover:scale-110 transition-transform">
+                      {item.display || item.value}
+                    </div>
+                    <div className="relative w-full">
+                      <div 
+                        className={`w-full rounded-t-xl bg-gradient-to-t ${item.gradient} transition-all duration-700 shadow-lg hover:shadow-2xl relative overflow-hidden`}
+                        style={{ height: `${(item.value / item.max) * 100}%`, minHeight: '20px' }}
+                      >
+                        <div className="absolute inset-0 bg-white/20 shimmer" />
+                      </div>
+                    </div>
+                    <div className="text-sm font-mono text-muted-foreground font-semibold">{item.label}</div>
                   </div>
-                )}
-                {activeLayers.includes('animals') && (
-                  <div className="flex-1 flex flex-col items-center gap-2">
-                    <div className="text-xs font-mono font-bold text-green-500">{(currentData.bears / 1000).toFixed(0)}k</div>
-                    <div 
-                      className="w-full rounded-t bg-green-500 transition-all duration-500"
-                      style={{ height: `${(currentData.bears / 35000) * 100}%` }}
-                    />
-                    <div className="text-xs font-mono text-muted-foreground">Медведи</div>
-                  </div>
-                )}
-                {activeLayers.includes('co2') && (
-                  <div className="flex-1 flex flex-col items-center gap-2">
-                    <div className="text-xs font-mono font-bold text-purple-500">{currentData.co2}</div>
-                    <div 
-                      className="w-full rounded-t bg-purple-500 transition-all duration-500"
-                      style={{ height: `${((currentData.co2 - 300) / 220) * 100}%` }}
-                    />
-                    <div className="text-xs font-mono text-muted-foreground">CO₂</div>
+                ))}
+                {activeLayers.length === 0 && (
+                  <div className="flex-1 text-center text-muted-foreground py-20">
+                    <Icon name="Layers" size={48} className="mx-auto mb-3 opacity-30" />
+                    <p className="font-mono">Выберите слои данных ниже</p>
                   </div>
                 )}
               </div>
@@ -260,20 +257,27 @@ const ArcticMap = ({ character, onOpenAI }: ArcticMapProps) => {
           </Card>
 
           {/* Data layers */}
-          <Card className="p-6 bg-white/90 backdrop-blur">
-            <h3 className="font-bold mb-4 flex items-center gap-2">
-              <Icon name="Layers" size={20} />
-              Слои данных
+          <Card className="p-7 bg-white/95 backdrop-blur-xl border-2 border-primary/20 shadow-xl hover:shadow-2xl transition-all duration-300 animate-fade-in card-hover" style={{ animationDelay: '0.2s' }}>
+            <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-primary/10 to-nasa-cyan/10 rounded-lg">
+                <Icon name="Layers" size={24} className="text-primary" />
+              </div>
+              <span className="bg-gradient-to-r from-primary to-nasa-cyan bg-clip-text text-transparent">Слои данных</span>
             </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {dataLayers.map(layer => (
+            <div className="grid grid-cols-2 gap-4">
+              {dataLayers.map((layer, index) => (
                 <Button
                   key={layer.id}
                   variant={activeLayers.includes(layer.id) ? 'default' : 'outline'}
                   onClick={() => toggleLayer(layer.id)}
-                  className="justify-start"
+                  className={`justify-start h-14 text-base transition-all duration-300 hover:scale-105 shine-effect animate-fade-in-scale ${
+                    activeLayers.includes(layer.id)
+                      ? 'bg-gradient-to-r from-primary to-nasa-cyan shadow-lg'
+                      : 'border-2 hover:border-primary/50'
+                  }`}
+                  style={{ animationDelay: `${0.3 + index * 0.05}s` }}
                 >
-                  <Icon name={layer.icon as any} size={18} className="mr-2" />
+                  <Icon name={layer.icon as any} size={22} className="mr-3" />
                   {layer.name}
                 </Button>
               ))}
@@ -283,35 +287,47 @@ const ArcticMap = ({ character, onOpenAI }: ArcticMapProps) => {
 
         {/* Missions panel */}
         <div className="space-y-6">
-          <Card className="p-6 bg-white/90 backdrop-blur">
-            <h3 className="font-bold mb-4 flex items-center gap-2">
-              <Icon name="Target" size={20} />
-              Ваши миссии
+          <Card className="p-7 bg-white/95 backdrop-blur-xl border-2 border-primary/20 shadow-xl hover:shadow-2xl transition-all duration-300 animate-fade-in card-hover" style={{ animationDelay: '0.3s' }}>
+            <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-primary/10 to-nasa-cyan/10 rounded-lg animate-bounce-subtle">
+                <Icon name="Target" size={24} className="text-primary" />
+              </div>
+              <span className="bg-gradient-to-r from-primary to-nasa-cyan bg-clip-text text-transparent">Ваши миссии</span>
             </h3>
-            <div className="space-y-3">
-              {missions.map(mission => {
+            <div className="space-y-4">
+              {missions.map((mission, index) => {
                 const isCompleted = completedMissions.includes(mission.id);
                 return (
                   <button
                     key={mission.id}
                     onClick={() => !isCompleted && setSelectedMission(mission)}
-                    className={`w-full text-left p-4 rounded-lg border-2 transition-all hover:scale-102 ${
+                    className={`group w-full text-left p-5 rounded-xl border-2 transition-all duration-300 card-hover shine-effect animate-fade-in-scale relative overflow-hidden ${
                       isCompleted
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-primary/30 hover:border-primary bg-white hover:shadow-md'
+                        ? 'border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-md'
+                        : 'border-primary/30 hover:border-primary bg-white hover:shadow-xl hover:scale-105'
                     }`}
                     disabled={isCompleted}
+                    style={{ animationDelay: `${0.4 + index * 0.1}s` }}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h4 className="font-bold mb-1">{mission.title}</h4>
-                        <p className="text-sm text-muted-foreground">{mission.description}</p>
+                    {!isCompleted && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-nasa-cyan/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    )}
+                    <div className="relative flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <h4 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">{mission.title}</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{mission.description}</p>
                       </div>
-                      {isCompleted ? (
-                        <Icon name="CheckCircle" size={24} className="text-green-500 flex-shrink-0" />
-                      ) : (
-                        <Icon name="ArrowRight" size={20} className="text-primary flex-shrink-0" />
-                      )}
+                      <div className="flex-shrink-0">
+                        {isCompleted ? (
+                          <div className="p-2 bg-green-500 rounded-full animate-fade-in-scale">
+                            <Icon name="CheckCircle2" size={28} className="text-white" />
+                          </div>
+                        ) : (
+                          <div className="p-2 bg-primary/10 rounded-full group-hover:bg-primary group-hover:scale-110 transition-all">
+                            <Icon name="Play" size={24} className="text-primary group-hover:text-white" />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </button>
                 );
@@ -320,16 +336,32 @@ const ArcticMap = ({ character, onOpenAI }: ArcticMapProps) => {
           </Card>
 
           {/* Info panel */}
-          <Card className="p-6 bg-white/90 backdrop-blur">
-            <h3 className="font-bold mb-3 flex items-center gap-2">
-              <Icon name="Info" size={20} />
-              О проекте
+          <Card className="p-7 bg-gradient-to-br from-white/95 to-accent/30 backdrop-blur-xl border-2 border-primary/20 shadow-xl hover:shadow-2xl transition-all duration-300 animate-fade-in card-hover" style={{ animationDelay: '0.6s' }}>
+            <h3 className="font-bold text-xl mb-4 flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-primary/10 to-nasa-cyan/10 rounded-lg">
+                <Icon name="Info" size={24} className="text-primary" />
+              </div>
+              <span className="bg-gradient-to-r from-primary to-nasa-cyan bg-clip-text text-transparent">О проекте</span>
             </h3>
-            <p className="text-sm text-muted-foreground mb-3">
+            <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
               Интерактивный симулятор исследования Арктики с анализом климатических изменений за 100 лет.
             </p>
-            <Button variant="outline" size="sm" className="w-full">
-              <Icon name="BookOpen" size={16} className="mr-2" />
+            <div className="space-y-3 mb-5">
+              <div className="flex items-center gap-2 text-sm">
+                <Icon name="MapPin" size={16} className="text-nasa-cyan" />
+                <span className="text-muted-foreground">Карта Арктики</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Icon name="TrendingUp" size={16} className="text-nasa-cyan" />
+                <span className="text-muted-foreground">Динамика 1925-2050</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Icon name="Award" size={16} className="text-nasa-cyan" />
+                <span className="text-muted-foreground">{missions.length} уникальных миссий</span>
+              </div>
+            </div>
+            <Button className="w-full bg-gradient-to-r from-primary to-nasa-cyan hover:from-primary/90 hover:to-nasa-cyan/90 transition-all hover:scale-105 shine-effect">
+              <Icon name="BookOpen" size={18} className="mr-2" />
               Подробнее о проекте
             </Button>
           </Card>

@@ -104,32 +104,39 @@ const AIAssistant = ({ character, onClose }: AIAssistantProps) => {
   ];
 
   return (
-    <div className="min-h-screen p-6 animate-fade-in">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 via-cyan-50 to-purple-50 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-purple-300/20 to-transparent rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-tl from-cyan-300/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+      </div>
+
+      <div className="max-w-5xl mx-auto relative z-10">
         {/* Header */}
-        <div className="mb-6">
-          <Button variant="ghost" onClick={onClose} className="mb-4">
+        <div className="mb-6 animate-slide-up">
+          <Button onClick={onClose} className="mb-4 bg-white/90 hover:bg-white text-primary border-2 border-primary/20 hover:border-primary/40 transition-all hover:scale-105">
             <Icon name="ArrowLeft" size={20} className="mr-2" />
             Назад к карте
           </Button>
-          <Card className="p-6 bg-gradient-to-r from-primary to-nasa-cyan text-white">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur">
-                  <Icon name="Bot" size={32} />
+          <Card className="p-7 bg-gradient-to-r from-primary via-purple-600 to-nasa-cyan text-white shadow-2xl border-0 relative overflow-hidden">
+            <div className="absolute inset-0 bg-white/5 shimmer" />
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-5">
+                <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-xl shadow-xl animate-bounce-subtle">
+                  <Icon name="Bot" size={40} className="animate-pulse-glow" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold">Арктина</h1>
-                  <p className="text-white/90 font-mono">ИИ-наставник по Арктике</p>
+                  <h1 className="text-4xl font-bold mb-1">Арктина</h1>
+                  <p className="text-white/90 font-mono text-lg">ИИ-наставник по Арктике</p>
                 </div>
               </div>
-              <div className="text-4xl">{character.avatar}</div>
+              <div className="text-6xl animate-float">{character.avatar}</div>
             </div>
           </Card>
         </div>
 
         {/* Chat area */}
-        <Card className="bg-white/90 backdrop-blur flex flex-col" style={{ height: 'calc(100vh - 280px)' }}>
+        <Card className="bg-white/95 backdrop-blur-xl flex flex-col border-2 border-primary/20 shadow-2xl animate-fade-in" style={{ height: 'calc(100vh - 280px)', animationDelay: '0.1s' }}>
           {/* Messages */}
           <ScrollArea className="flex-1 p-6" ref={scrollRef}>
             <div className="space-y-4">
