@@ -88,11 +88,23 @@ const missionsByRole: Record<Role, Mission[]> = {
   ]
 };
 
+// Data by year for dynamic charts
+const dataByYear: Record<number, { ice: number; temp: number; bears: number; co2: number }> = {
+  1925: { ice: 16.5, temp: -2.0, bears: 35000, co2: 305 },
+  1950: { ice: 16.2, temp: -1.5, bears: 32000, co2: 310 },
+  1975: { ice: 15.8, temp: -1.2, bears: 28000, co2: 330 },
+  2000: { ice: 15.2, temp: -0.5, bears: 26000, co2: 369 },
+  2025: { ice: 8.2, temp: 1.5, bears: 17800, co2: 420 },
+  2050: { ice: 3.1, temp: 3.5, bears: 8000, co2: 520 }
+};
+
 const ArcticMap = ({ character, onOpenAI }: ArcticMapProps) => {
   const [selectedYear, setSelectedYear] = useState(2025);
   const [activeLayers, setActiveLayers] = useState<string[]>(['ice']);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [completedMissions, setCompletedMissions] = useState<string[]>([]);
+
+  const currentData = dataByYear[selectedYear];
 
   const missions = missionsByRole[character.role];
 
@@ -173,25 +185,76 @@ const ArcticMap = ({ character, onOpenAI }: ArcticMapProps) => {
             </div>
           </Card>
 
-          {/* Map visualization */}
+          {/* Map visualization with dynamic chart */}
           <Card className="p-6 bg-white/90 backdrop-blur">
-            <div className="aspect-video bg-gradient-to-b from-primary/5 to-nasa-cyan/5 rounded-lg border-2 border-dashed border-primary/20 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 grid-pattern opacity-30" />
-              <div className="relative z-10 text-center">
-                <Icon name="Globe" size={80} className="text-primary/30 mx-auto mb-4 animate-float" />
-                <p className="font-mono text-muted-foreground">
-                  Карта Арктики • Год: {selectedYear}
-                </p>
-                <div className="mt-4 flex gap-2 justify-center flex-wrap">
-                  {activeLayers.map(layerId => {
-                    const layer = dataLayers.find(l => l.id === layerId);
-                    return layer ? (
-                      <Badge key={layerId} variant="secondary" className={layer.color}>
-                        {layer.name}
-                      </Badge>
-                    ) : null;
-                  })}
+            <h3 className="font-bold mb-4 flex items-center gap-2">
+              <Icon name="BarChart3" size={20} />
+              Данные за {selectedYear} год
+            </h3>
+            <div className="bg-gradient-to-b from-accent to-white p-6 rounded-lg border border-primary/20">
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                  <Icon name="Snowflake" size={24} className="text-blue-500 mx-auto mb-1" />
+                  <div className="text-2xl font-bold font-mono text-blue-500">{currentData.ice}</div>
+                  <div className="text-xs text-muted-foreground">млн км² льда</div>
                 </div>
+                <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                  <Icon name="Thermometer" size={24} className="text-orange-500 mx-auto mb-1" />
+                  <div className="text-2xl font-bold font-mono text-orange-500">{currentData.temp > 0 ? '+' : ''}{currentData.temp}°C</div>
+                  <div className="text-xs text-muted-foreground">температура</div>
+                </div>
+                <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                  <Icon name="PawPrint" size={24} className="text-green-500 mx-auto mb-1" />
+                  <div className="text-2xl font-bold font-mono text-green-500">{(currentData.bears / 1000).toFixed(1)}k</div>
+                  <div className="text-xs text-muted-foreground">медведей</div>
+                </div>
+                <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                  <Icon name="CloudRain" size={24} className="text-purple-500 mx-auto mb-1" />
+                  <div className="text-2xl font-bold font-mono text-purple-500">{currentData.co2}</div>
+                  <div className="text-xs text-muted-foreground">ppm CO₂</div>
+                </div>
+              </div>
+              <div className="flex items-end justify-around h-48 gap-3">
+                {activeLayers.includes('ice') && (
+                  <div className="flex-1 flex flex-col items-center gap-2">
+                    <div className="text-xs font-mono font-bold text-blue-500">{currentData.ice}</div>
+                    <div 
+                      className="w-full rounded-t bg-blue-500 transition-all duration-500"
+                      style={{ height: `${(currentData.ice / 16.5) * 100}%` }}
+                    />
+                    <div className="text-xs font-mono text-muted-foreground">Лёд</div>
+                  </div>
+                )}
+                {activeLayers.includes('temperature') && (
+                  <div className="flex-1 flex flex-col items-center gap-2">
+                    <div className="text-xs font-mono font-bold text-orange-500">{currentData.temp}°C</div>
+                    <div 
+                      className="w-full rounded-t bg-orange-500 transition-all duration-500"
+                      style={{ height: `${Math.abs(currentData.temp / 3.5) * 100}%` }}
+                    />
+                    <div className="text-xs font-mono text-muted-foreground">Темп.</div>
+                  </div>
+                )}
+                {activeLayers.includes('animals') && (
+                  <div className="flex-1 flex flex-col items-center gap-2">
+                    <div className="text-xs font-mono font-bold text-green-500">{(currentData.bears / 1000).toFixed(0)}k</div>
+                    <div 
+                      className="w-full rounded-t bg-green-500 transition-all duration-500"
+                      style={{ height: `${(currentData.bears / 35000) * 100}%` }}
+                    />
+                    <div className="text-xs font-mono text-muted-foreground">Медведи</div>
+                  </div>
+                )}
+                {activeLayers.includes('co2') && (
+                  <div className="flex-1 flex flex-col items-center gap-2">
+                    <div className="text-xs font-mono font-bold text-purple-500">{currentData.co2}</div>
+                    <div 
+                      className="w-full rounded-t bg-purple-500 transition-all duration-500"
+                      style={{ height: `${((currentData.co2 - 300) / 220) * 100}%` }}
+                    />
+                    <div className="text-xs font-mono text-muted-foreground">CO₂</div>
+                  </div>
+                )}
               </div>
             </div>
           </Card>

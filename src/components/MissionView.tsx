@@ -141,10 +141,50 @@ const MissionView = ({ mission, character, onComplete, onBack }: MissionViewProp
   const data = missionData[mission.id];
   const maxValue = Math.max(...data.data.map(d => d.value));
 
+  // Play sound effect
+  const playSound = (type: 'success' | 'error') => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    if (type === 'success') {
+      // Success: ascending notes
+      oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+      oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+      oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    } else {
+      // Error: descending notes
+      oscillator.frequency.setValueAtTime(392.00, audioContext.currentTime); // G4
+      oscillator.frequency.setValueAtTime(329.63, audioContext.currentTime + 0.15); // E4
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+    }
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  };
+
   const handleSubmit = () => {
     const numAnswer = parseFloat(userAnswer);
-    const correct = Math.abs(numAnswer - data.answer) < data.answer * 0.1; // 10% tolerance
+    // More flexible tolerance for different answer ranges
+    let tolerance = 0.15; // 15% default
+    
+    // Special cases for specific missions
+    if (mission.id === 'bear-migration' || mission.id === 'ecosystem') {
+      tolerance = 0.2; // 20% for population counts (they have decimals in thousands)
+    }
+    if (mission.id === 'data-story') {
+      tolerance = 0.25; // 25% for ratio calculations
+    }
+    
+    const correct = Math.abs(numAnswer - data.answer) <= data.answer * tolerance;
     setIsCorrect(correct);
+    playSound(correct ? 'success' : 'error');
     setStep('result');
   };
 
@@ -264,15 +304,20 @@ const MissionView = ({ mission, character, onComplete, onBack }: MissionViewProp
                 </div>
               </div>
 
-              <Button 
-                size="lg" 
-                onClick={handleSubmit}
-                disabled={!userAnswer}
-                className="w-full"
-              >
-                <Icon name="Send" size={20} className="mr-2" />
-                Отправить ответ
-              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  size="lg" 
+                  onClick={handleSubmit}
+                  disabled={!userAnswer}
+                  className="flex-1"
+                >
+                  <Icon name="Send" size={20} className="mr-2" />
+                  Отправить ответ
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                Подсказка: используйте данные из графика выше
+              </p>
             </div>
           </Card>
         )}
